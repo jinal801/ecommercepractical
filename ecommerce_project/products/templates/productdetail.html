@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+ <head>
+   <title>products api</title>
+   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+ </head>
+<body>
+	<div class="container">
+		<h2>Product CRUD</h2>
+		<table class="table" id="records_table" border='1'>
+	    <tr class="bg-primary">
+	        <th>Id</th>
+	        <th>Name</th>
+	        <th>Price</th>
+	        <th>Owner</th>
+	        <th>Action</th>
+	    </tr>
+		</table>
+        <div class="text-right">
+        <button type="button" class="btn btn-success" data-toggle="modal" id="myCreate" data-target="#createModal">Create</button>
+        </div>
+                    <!--  Create Modal -->
+            <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Create Students</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <form id="myForm">{% csrf_token %}
+                      <div class="form-group">
+                        <label for="name">Product Name</label>
+                        <input type="text" class="form-control"  name="name" placeholder="product name">
+                      </div>
+                      <div class="form-group">
+                        <label for="price">Price </label>
+                        <input type="text" class="form-control"  name="price" placeholder="price">
+                      </div>
+                      <div class="form-row">
+                        <div class="form-group col-md-6">
+                          <label for="product_code">Product Code</label>
+                          <input type="text" class="form-control" name="product_code">
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="screate">Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+                    <!--  Update Modal -->
+            <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Create Students</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <form>
+                        <input type="hidden" id="Myid" value="">
+                      <div class="form-group">
+                        <label for="name">Product name</label>
+                        <input type="text" class="form-control" id="first_name" name="name" value="">
+                      </div>
+                      <div class="form-group">
+                        <label for="product_code">Product Code</label>
+                        <input type="text" class="form-control" id="last_name" name="product_code" value="">
+                      </div>
+                      <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="gender" name="category" class="form-control">
+                            <option selected>Choose...</option>
+                            <option>Electronics</option>
+                            <option>Clothes</option>
+                          </select>
+                        <div>
+                    </form>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="supdate">Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+	</div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script>
+// CSRF code
+    function getCookie(name) {
+        var cookieValue = null;
+        var i = 0;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (i; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    var csrftoken = getCookie('csrftoken');
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    // Use csrf token while doing post request, this will prevent 500 Server Error
+    $.ajaxSetup({
+        crossDomain: false, // obviates need for sameOrigin test
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type)) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    }); 
+
+</script>
+    <script type="text/javascript">
+    $.ajax({
+             url : "/api/products/",
+             dataType: "json",
+             success : function (response) {
+             			 var trHTML = '';
+                $.each(response, function (i, item) {
+                    trHTML += "<tr><td class='maya'>" + item.id + "</td><td>" + item.name + "</td><td>" + item.price + "</td><td>" + item.product_code +  "</td><td><button class='btn btn-primary update' id ="+ item.id +" data-toggle='modal' data-target='#updateModal'>Update</button><button class='btn btn-danger delete' id ="+ item.id +">Delete</button>"
+                    "</td></tr>";
+                });
+                $('#records_table').append(trHTML);
+                    }
+            });
+    </script>
+    <script>
+        $('#records_table').on('click', '.delete', function(){
+                var id = $(this).attr('id');
+                var myurl = 'http://127.0.0.1:8004/api/products/'+id;
+
+                $.ajax({
+                    async: true,
+                    url:myurl,
+                    method:'DELETE',
+                    success: function(result){
+                        location.reload();
+                    }
+                });
+
+        });
+        $('#records_table').on('click', '.update', function(){
+                var id = $(this).attr('id');
+                 $('input[id=Myid]').val(id);
+
+                var myurl = '/api/products/'+id;
+                $( "#name" ).change(function() {
+                  $('input[name=name]').val($(this).val());
+
+                });
+        $( "#price" ).change(function() {
+                  $('input[name=price]').val($(this).val());
+
+                });
+        $( "#product_code" ).change(function() {
+                  $('input[name=product_code]').val($(this).val());
+
+                });
+        $( "#category" ).change(function() {
+                  $('select[name=category]').val($(this).val());
+
+                });
+
+
+                $.ajax({
+                    async: true,
+                    url:myurl,
+                    method:'GET',
+                    success: function(result){
+                        $('input[name="name"]').val(result.name);
+                        $('input[name="price"]').val(result.price);
+                        $('input[name="product_code"]').val(result.product_code);
+                        $('select[name="category"]').val(result.category);
+                    }
+                });
+
+        });
+
+        $('#myCreate').click(function(){ 
+            $("#myForm").trigger('reset');
+        });
+        $('#screate').click(function(){
+            $.ajax({
+                type : 'POST',
+                url : '/api/products/',
+                data : {
+                    '_token':$('input[name=_token]').val(),
+                    'name':$('input[name=name]').val(),
+                    'price':$('input[name=price]').val(),
+                    'product_code':$('input[name=product_code]').val(),
+                    'category':$('select[name=category]').val()
+                },
+                success: function(data){
+                   location.reload(); 
+                }
+            })
+        });
+        $('#supdate').click(function(){
+            var id = $("#Myid").attr("value");
+            console.log(id);
+            var myurl = '/api/products/'+id+'/update/';
+
+            $.ajax({
+                type : 'PUT',
+                url : myurl,
+                data : {
+                    '_token':$('input[name=_token]').val(),
+                    'name':$('input[name=name]').val(),
+                    'price':$('input[name=price]').val(),
+                    'product_code':$('input[name=product_code]').val()
+                    'category':$('select[name=category]').val()
+                },
+                success: function(data){
+                   location.reload();
+
+                },
+            })
+        });
+    </script>
+
+
+</body>
+</html>
